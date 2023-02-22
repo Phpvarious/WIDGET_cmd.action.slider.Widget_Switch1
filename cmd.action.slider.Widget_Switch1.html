@@ -1,0 +1,130 @@
+<div class="cmd cmd-widget" data-type="action" data-subtype="slider" data-template="value" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#" data-eqLogic_id="#eqLogic_id#">
+  <!--
+    Auteur        : Phpvarious
+    Mise à jour   : 22/02/2023 => création
+    Lien          : https://phpvarious.github.io/documentation/widget/fr_FR/action/slider/WIDGET_cmd.action.slider.Widget_Switch1
+  -->
+  <span class="cmdName title #hide_name#">#valueName#</span>
+  <div class="content-xs" style="position: relative;">
+    <input class="toggle#uid#" type="checkbox" id="switch#id#"/>
+    <label for="switch#id#" class="binarySwitch#id#"></label>
+  </div>
+  <div class="timeCmd label label-default #value_history#" data-type="info" data-cmd_id="#value_id#"></div>
+  <template>
+    <div>width_switch : Largueur du switch [Défaut : 40 | mini : 30]</div>
+    <div>height_switch : Hauteur du widget [Défaut : 20 | mini : 20]</div>
+    <div>color_off : Couleur d'arrière plan lorsque la valeur vaut 0 [Exemple : #ffffff, yellow ... | Defaut : grey]</div>
+    <div>color_on : Couleur d'arrière plan lorsque la valeur vaut 1 [Exemple : #ffffff, green ... | Defaut : #bada55]</div>
+    <div>color_switch : Couleur de la pastille [Exemple : #ffffff, yellow ... | Defaut : #ffffff]</div>
+    <div>time : duration|date (Affiche durée ou date de la valeur)</div>
+  </template>
+  <script>
+    var colorOff#id# = ('#color_off#' != '#' + 'color_off#') ? "#color_off#" : 'grey';
+    var colorOn#id# = ('#color_on#' != '#' + 'color_on#') ? "#color_on#" : 'var(--bt-success-color)';
+    var colorBouton#id# = ('#color_switch#' != '#' + 'color_switch#') ? "#color_switch#" : '#fff';
+    var widthWidget#id# = ('#width_switch#' != '#' + 'width_switch#') ? "#width_switch#" : '40';
+    var heightWidget#id# = ('#height_switch#' != '#' + 'height_switch#') ? "#height_switch#" : '20';
+    var fullJs#id# = false
+    var debug#id# = ('#debug#' != '#' + 'debug#') ? true : false;
+    var jeedomVersion#id# = 4.4
+    widthWidget#id# = (!is_numeric(widthWidget#id#) || widthWidget#id# == '' || widthWidget#id# < 30) ? 30 : widthWidget#id#;
+    heightWidget#id# = (!is_numeric(heightWidget#id#) || heightWidget#id# == '' || heightWidget#id# < 20) ? 20 : heightWidget#id#; 
+    document.documentElement.style.setProperty('--colorOff#id#', colorOff#id#);
+    document.documentElement.style.setProperty('--colorOn#id#', colorOn#id#);
+    document.documentElement.style.setProperty('--colorBouton#id#', colorBouton#id#);
+    document.documentElement.style.setProperty('--width#id#', widthWidget#id#+'px');
+    document.documentElement.style.setProperty('--height#id#', heightWidget#id#+'px');
+    
+    
+    
+    if(typeof jeeFrontEnd === 'undefined') {
+      if (debug#id#) console.log('jeeFrontEnd no exist -> version <= 4.2')
+      jeedomVersion#id# = 4.2
+    }
+    else
+    {
+      jeedomVersion#id# = jeeFrontEnd.jeedomVersion.substr(0, 3)
+      if (debug#id#) console.log('jeeFrontEnd -> version == ' + jeedomVersion#id#)
+    }
+    
+    if (jeedomVersion#id# >= 4.4) {
+      fullJs#id# = true
+      if (debug#id#) console.log('Full Js')
+    }
+    
+    if (typeof jeedom.cmd.addUpdateFunction !== 'function') { // a partir de la 4.3
+      if (debug#id#) console.log('jeedom.cmd.addUpdateFunction no exist')
+      jeedom.cmd.addUpdateFunction = function(id,func) { jeedom.cmd.update[id]=func; }
+    }
+
+    jeedom.cmd.addUpdateFunction('#id#', function(_options) {
+      if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
+        if ('#time#' == 'duration' || '#time#' == 'date') {
+          if (fullJs#id#) jeedom.cmd.displayDuration(_options.valueDate, cmd.querySelector('.timeCmd'), '#time#') // jeedom >= v4.4
+          else jeedom.cmd.displayDuration(_options.valueDate, $('.cmd[data-cmd_id=#id#]').find('.timeCmd'), '#time#') // jeedom >= v4.4
+        }
+        if (_options.display_value >= 1 || _options.display_value == 'on') cmd.querySelector('input.toggle#uid#').checked = true
+        else cmd.querySelector('input.toggle#uid#').checked = false
+      }
+    })
+    
+    jeedom.cmd.refreshValue([{ cmd_id: '#id#', value: '#state#', display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#', unit: '#unite#' }])
+    
+    document.querySelector('.cmd[data-cmd_uid=#uid#] .toggle#uid#').addEventListener('click', function(event) {
+      if (this.checked === true) jeedom.cmd.execute({id: '#id#', value: {slider: 1}})
+      else jeedom.cmd.execute({id: '#id#', value: {slider: 0}})
+    })
+  </script>
+  <style>
+    :root {
+      --colorOff#id# : grey;
+      --colorOn#id# : var(--bt-success-color);
+      --colorBouton#id# : #ffffff;
+      --width#id# : 40px;
+      --height#id# : 20px;
+    }
+    input[class=toggle#uid#]{
+	  visibility: hidden;
+      position: absolute;
+    }
+    .binarySwitch#id# {
+	  cursor: pointer;
+	  text-indent: -9999px;
+	  width: var(--width#id#);
+	  height: var(--height#id#);
+	  background-color: var(--btnEq-default-color);
+      border-radius: 50px;
+	  position: relative;
+      margin-bottom: 0px; /* pour contrer le boostrap */
+      
+    }
+    [data-coloredicons="1"] .binarySwitch#id# {
+      background: var(--colorOff#id#);
+    }
+    
+    label.binarySwitch#id#::after {
+	  content: '';
+	  position: absolute;
+	  top: 3px;
+	  left: 5px;
+	  width: calc(var(--height#id#) - 6px);
+	  height: calc(var(--height#id#) - 6px);
+	  background-color: var(--link-color);
+	  border-radius: 40px;
+	  transition: 0.3s;
+    }
+    [data-coloredicons="1"] label.binarySwitch#id#::after {
+      background: var(--colorBouton#id#);
+    }
+    [data-coloredicons="1"] input:checked + label.binarySwitch#id# {
+	  background: var(--colorOn#id#);
+    }
+    input:checked + label.binarySwitch#id#:after {
+	  left: calc(100% - 5px);
+	  transform: translateX(-100%);
+    }
+    label.binarySwitch#id#:active:after {
+	  width: 30px;
+    }
+  </style>
+</div>
